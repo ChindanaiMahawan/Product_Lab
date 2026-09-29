@@ -14,12 +14,12 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
     const [cartItems, setCartItems] = useState<Product[]>([]);
 
-    // เดิมคือ handleToggleCart ใน ProductExplorer ย้ายมาไว้ตรงกลางที่นี่แทน
+    // ฟังก์ชัน สลับสถานะ ถ้าสินค้านี้อยู่ในตะกร้าแล้วให้เอาออก ถ้ายังไม่อยู่ให้เพิ่มเข้าไป
     function toggleCart(product: Product) {
         setCartItems((prevItems) =>
             prevItems.some((item) => item.id === product.id)
-                ? prevItems.filter((item) => item.id !== product.id)
-                : [...prevItems, product]
+                ? prevItems.filter((item) => item.id !== product.id) //id ไม่ตรง = ตัวที่กดถูกตัดออก
+                : [...prevItems, product]//คัดลอกของเดิมทั้งหมดแล้วต่อสินค้าใหม่ท้ายสุด
         );
     }
 

@@ -2,8 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { fetchProductById } from "@/lib/products";
 
+// ถ้าเข้า /167 Next.js จะส่ง { id: "167" } เข้ามาใน params
 type ProductDetailPageProps = {
-    // Next.js 15: params เป็น Promise ต้อง await ก่อนใช้งาน
+    // params เป็น Promise ต้อง await ก่อนใช้งาน
     params: Promise<{ id: string }>;
 };
 
@@ -41,7 +42,7 @@ export default async function ProductDetailPage(
 
     return (
         <main>
-            <Link href="/">← กลับหน้ารายการสินค้า</Link>
+            <Link href="/">กลับหน้ารายการสินค้า</Link>
 
             <h1>{product.title}</h1>
 

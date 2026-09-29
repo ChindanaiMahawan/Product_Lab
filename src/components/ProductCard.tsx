@@ -5,9 +5,9 @@ import Link from "next/link";
 import type { Product } from "@/lib/products";
 
 type ProductCardProps = {
-    product: Product;
-    inCart: boolean;
-    onToggleCart: (product: Product) => void;
+    product: Product; //ข้อมูลสินค้าที่จะแสดง
+    inCart: boolean; //สินค้าในตะกร้ามีมั้ย
+    onToggleCart: (product: Product) => void; //ไม่สนใจค่าที่คืนมา
 };
 
 // สีจุดสถานะ ให้ตรงกับความหมายของแต่ละสถานะ

@@ -1,24 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { defaultQuery, fetchProducts } from "@/lib/products";
 import ProductSearchForm from "./ProductSearchForm";
 import ProductForm from "./ProductForm";
 import { useCart } from "./CartContext";
 import ProductCard from "./ProductCard";
-import type { Product, ProductDraft, ProductList, SearchQuery, } from "@/lib/products";
+import type { Product, ProductDraft, ProductList, SearchQuery } from "@/lib/products";
 
-// แก้: นำ "idle" ออก เพราะหน้าจอโหลดเองตั้งแต่เปิด ไม่มีสถานะรอคลิกอีกต่อไป
 type LoadState = "loading" | "error" | "ready";
 
-export default function ProductExplorer() {
+type Props = {
+    isLoggedIn: boolean;
+    // ปุ่ม login/logout จาก server component
+    authButtons: ReactNode;
+};
+
+export default function ProductExplorer({ isLoggedIn, authButtons }: Props) {
     const [products, setProducts] = useState<Product[]>([]);
-    // แก้: ค่าเริ่มต้นเป็น "loading" เพราะหน้าจอเริ่มด้วยการโหลดเสมอ
     const [status, setStatus] = useState<LoadState>("loading");
     const [errorMessage, setErrorMessage] = useState("");
-    // เพิ่ม: ดึงตะกร้าจาก context กลาง แทนการเก็บ state แยกในหน้านี้
-    // ทำให้ข้อมูลตะกร้าไม่หายเวลากดไปหน้า /cart
     const { cartItems, toggleCart } = useCart();
 
     function saveProduct(draft: ProductDraft) {
@@ -34,7 +37,6 @@ export default function ProductExplorer() {
     }
 
     function showResult(list: ProductList) {
-        console.log("ผลลัพธ์ใน Explorer:", list.products);
         setProducts(list.products);
         setStatus("ready");
     }
@@ -49,7 +51,6 @@ export default function ProductExplorer() {
 
     useEffect(() => {
         fetchProducts(defaultQuery).then(showResult).catch(showError);
-        // อาร์เรย์ว่าง: สั่งให้ทำงานเพียงครั้งเดียวตอนแสดงผลครั้งแรก
     }, []);
 
     async function loadProducts(query: SearchQuery) {
@@ -82,14 +83,7 @@ export default function ProductExplorer() {
                     >
                         ตะกร้าสินค้า ({cartItems.length})
                     </Link>
-                    <button
-                        type="button"
-                        onClick={() => loadProducts(defaultQuery)}
-                        disabled={status === "loading"}
-                        className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                        {status === "loading" ? "กำลังโหลด" : "โหลดข้อมูล"}
-                    </button>
+                    {authButtons}
                 </div>
             </div>
 
@@ -122,14 +116,31 @@ export default function ProductExplorer() {
                 {status === "ready" && products.length > 0 && (
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {products.map((item) => (
-                            <ProductCard
-                                key={item.id}
-                                product={item}
-                                inCart={cartItems.some(
-                                    (cartItem) => cartItem.id === item.id
+                            <div key={item.id} data-testid="product" className="flex flex-col gap-2">
+                                <ProductCard
+                                    product={item}
+                                    inCart={cartItems.some(
+                                        (cartItem) => cartItem.id === item.id
+                                    )}
+                                    onToggleCart={toggleCart}
+                                />
+                                {isLoggedIn && (
+                                    <div className="flex gap-3 text-sm">
+                                        <Link
+                                            href={`/products/${item.id}/edit`}
+                                            className="text-teal-700 hover:underline"
+                                        >
+                                            แก้ไข
+                                        </Link>
+                                        <Link
+                                            href={`/products/${item.id}/delete`}
+                                            className="text-rose-600 hover:underline"
+                                        >
+                                            ลบ
+                                        </Link>
+                                    </div>
                                 )}
-                                onToggleCart={toggleCart}
-                            />
+                            </div>
                         ))}
                     </div>
                 )}
